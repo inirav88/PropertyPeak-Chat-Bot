@@ -186,24 +186,6 @@ const App: React.FC = () => {
               </div>
             </section>
 
-            {/* Custom Chat Flow Builder (Already created - preserved) */}
-            <section className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-sm">
-              <h3 className="text-xl font-black text-slate-800 mb-8">Custom Chat Flow Builder</h3>
-              <div className="flex gap-3 mb-8">
-                  <input type="text" placeholder="Step Name" className="p-3 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold outline-none" value={newFlowStep.step} onChange={e => setNewFlowStep({...newFlowStep, step: e.target.value})} />
-                  <input type="text" placeholder="Bot Message" className="p-3 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold outline-none w-64" value={newFlowStep.message} onChange={e => setNewFlowStep({...newFlowStep, message: e.target.value})} />
-                  <button onClick={addFlowStep} className="bg-indigo-600 text-white px-6 rounded-xl text-[10px] font-black uppercase tracking-widest">Add Step</button>
-              </div>
-              <div className="space-y-3">
-                {config.chatFlow.map((flow, i) => (
-                  <div key={flow.id} className="flex items-center gap-4 p-4 bg-slate-50 border border-slate-100 rounded-2xl group">
-                    <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-black text-xs">{i + 1}</div>
-                    <div className="flex-1 text-sm text-slate-700 font-medium"><strong>{flow.step}:</strong> {flow.message}</div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
             {/* Intelligence Modules Matrix */}
             <section>
               <h3 className="text-xl font-black text-slate-800 mb-8 flex items-center gap-3">
@@ -218,7 +200,7 @@ const App: React.FC = () => {
 
         {activeTab === 'settings' && (
           <div className="space-y-12 max-w-5xl animate-in fade-in">
-            {/* Master AI Intelligence Hub (Preserved & Enhanced) */}
+            {/* Master AI Intelligence Hub */}
             <section className="bg-white p-10 rounded-[3.5rem] border border-slate-200 shadow-sm overflow-hidden">
                <div className="flex justify-between items-center mb-10 pb-6 border-b border-slate-50">
                   <div className="flex items-center gap-4">
@@ -285,23 +267,75 @@ const App: React.FC = () => {
                           <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">xAI API Key</label>
                           <input type="password" value={config.api.grokKey} onChange={e => setConfig({...config, api: {...config.api, grokKey: e.target.value}})} className="w-full p-4 bg-white border border-slate-200 rounded-2xl font-mono text-xs outline-none" placeholder="xai-..." />
                         </div>
-                        <div className="grid grid-cols-2 gap-6 p-6 bg-slate-900 rounded-3xl text-white">
-                          <div className="space-y-3">
-                            <div className="flex justify-between text-[10px] font-bold"><span>Max Tokens</span><span>{config.api.maxTokens}</span></div>
-                            <input type="range" min="256" max="8192" step="256" value={config.api.maxTokens} onChange={e => setConfig({...config, api: {...config.api, maxTokens: parseInt(e.target.value)}})} className="w-full accent-indigo-500" />
-                          </div>
-                          <div className="space-y-3">
-                            <div className="flex justify-between text-[10px] font-bold"><span>Temperature Bias</span><span>{config.api.temperatureModifier}</span></div>
-                            <input type="range" min="-1" max="1" step="0.1" value={config.api.temperatureModifier} onChange={e => setConfig({...config, api: {...config.api, temperatureModifier: parseFloat(e.target.value)}})} className="w-full accent-indigo-500" />
-                          </div>
-                        </div>
                       </div>
                     )}
                   </div>
                </div>
             </section>
 
-            {/* Automation & Lead Sync (NEW SECTION) */}
+            {/* Meta Cloud API Section */}
+            <section className="bg-white p-10 rounded-[3.5rem] border border-slate-200 shadow-sm border-l-[12px] border-l-blue-600">
+               <div className="flex items-center gap-4 mb-10">
+                  <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-3xl shadow-xl shadow-blue-100">
+                    <i className="fa-brands fa-whatsapp"></i>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">Meta Cloud API (WhatsApp)</h3>
+                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Production Bridge Settings</p>
+                  </div>
+               </div>
+               <div className="grid grid-cols-2 gap-8">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
+                      <i className="fa-solid fa-hashtag text-[8px]"></i> Phone Number ID
+                    </label>
+                    <input 
+                      type="text" 
+                      className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-mono text-xs outline-none focus:border-blue-600 transition-colors" 
+                      value={config.meta?.phoneNumberId} 
+                      onChange={e => setConfig({...config, meta: {...config.meta, phoneNumberId: e.target.value}})} 
+                      placeholder="e.g. 109XXXXXXXXXXXX" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
+                      <i className="fa-solid fa-briefcase text-[8px]"></i> WABA ID
+                    </label>
+                    <input 
+                      type="text" 
+                      className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-mono text-xs outline-none focus:border-blue-600 transition-colors" 
+                      value={config.meta?.wabaId} 
+                      onChange={e => setConfig({...config, meta: {...config.meta, wabaId: e.target.value}})} 
+                      placeholder="e.g. 92XXXXXXXXXXXXX" 
+                    />
+                  </div>
+                  <div className="col-span-2 space-y-2">
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
+                      <i className="fa-solid fa-key text-[8px]"></i> Permanent Access Token
+                    </label>
+                    <div className="relative">
+                      <input 
+                        type="password" 
+                        className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-mono text-xs outline-none focus:border-blue-600 transition-colors pr-12" 
+                        value={config.meta?.accessToken} 
+                        onChange={e => setConfig({...config, meta: {...config.meta, accessToken: e.target.value}})} 
+                        placeholder="EAABw..." 
+                      />
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300">
+                        <i className="fa-solid fa-lock text-sm"></i>
+                      </div>
+                    </div>
+                  </div>
+               </div>
+               <div className="mt-8 p-4 bg-blue-50/50 rounded-2xl border border-blue-100">
+                 <p className="text-[10px] text-blue-800 font-bold uppercase leading-relaxed">
+                   <i className="fa-solid fa-circle-info mr-2"></i>
+                   Ensure these credentials match your Meta Business App settings to enable live WhatsApp messaging.
+                 </p>
+               </div>
+            </section>
+
+            {/* Automation & Lead Sync */}
             <section className="bg-white p-10 rounded-[3.5rem] border border-slate-200 shadow-sm border-l-[12px] border-l-emerald-600">
                <div className="flex justify-between items-center mb-10 pb-6 border-b border-slate-50">
                   <div className="flex items-center gap-4">
@@ -332,40 +366,7 @@ const App: React.FC = () => {
                         onChange={e => setConfig({...config, automation: {...config.automation, sheetsEndpoint: e.target.value}})} 
                         placeholder="https://script.google.com/macros/s/.../exec" 
                       />
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                        <i className={`fa-solid ${config.automation?.sheetsEndpoint ? 'fa-link text-emerald-500' : 'fa-link-slash text-slate-300'}`}></i>
-                      </div>
                     </div>
-                    <p className="text-[9px] text-slate-400 font-bold uppercase mt-2 px-2">
-                      <i className="fa-solid fa-circle-info mr-1"></i> Use this URL to sync leads from the simulator to your spreadsheet automatically.
-                    </p>
-                  </div>
-               </div>
-            </section>
-
-            {/* Meta Cloud API (Preserved) */}
-            <section className="bg-white p-10 rounded-[3.5rem] border border-slate-200 shadow-sm border-l-[12px] border-l-blue-600">
-               <div className="flex items-center gap-4 mb-10">
-                  <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-3xl shadow-xl shadow-blue-100">
-                    <i className="fa-brands fa-whatsapp"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">Meta Cloud API (WhatsApp)</h3>
-                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Production Bridge Settings</p>
-                  </div>
-               </div>
-               <div className="grid grid-cols-2 gap-8">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Phone Number ID</label>
-                    <input type="text" className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-mono text-xs outline-none focus:border-blue-600" value={config.meta?.phoneNumberId} onChange={e => setConfig({...config, meta: {...config.meta, phoneNumberId: e.target.value}})} placeholder="109XXXXXXXXXXXX" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">WhatsApp Business Account ID</label>
-                    <input type="text" className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-mono text-xs outline-none focus:border-blue-600" value={config.meta?.wabaId} onChange={e => setConfig({...config, meta: {...config.meta, wabaId: e.target.value}})} placeholder="92XXXXXXXXXXXXX" />
-                  </div>
-                  <div className="col-span-2 space-y-2">
-                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Permanent Access Token</label>
-                    <input type="password" className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-mono text-xs outline-none focus:border-blue-600" value={config.meta?.accessToken} onChange={e => setConfig({...config, meta: {...config.meta, accessToken: e.target.value}})} placeholder="EAABw..." />
                   </div>
                </div>
             </section>

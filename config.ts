@@ -23,9 +23,9 @@ export const DEFAULT_CONFIG = {
     topP: 0.95
   },
   meta: {
-    phoneNumberId: "",
-    wabaId: "",
-    accessToken: "",
+    phoneNumberId: "", // <--- Place Phone Number ID here
+    wabaId: "",        // <--- Place WhatsApp Business Account ID here
+    accessToken: "",   // <--- Place Permanent Access Token here
     webhookVerifyToken: "propai_secure_v1",
     apiVersion: "v21.0"
   },

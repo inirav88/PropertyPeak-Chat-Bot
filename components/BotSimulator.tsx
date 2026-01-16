@@ -36,6 +36,9 @@ const BotSimulator: React.FC<{ config: any }> = ({ config }) => {
     const last = userInput.toUpperCase();
     const p = path.join(' > ').toUpperCase();
     const lastBotMsg = (messages.filter(m => m.role === 'model').slice(-1)[0]?.text || "").toUpperCase();
+    
+    const now = new Date();
+    const currentHour = now.getHours();
 
     // --- LEVEL 0: MAIN MENU ---
     if (path.length === 0) {
@@ -48,76 +51,46 @@ const BotSimulator: React.FC<{ config: any }> = ({ config }) => {
       if (last.includes('AGENT')) return { text: "Need help with:", buttons: ['🏠 PROPERTY SEARCH', '💰 SELLING ASSISTANCE', '📝 LEGAL PROCESS', '📅 SITE VISIT', '🔙 BACK'] };
     }
 
-    // --- BRANCH: BUY ---
-    if (p.includes('BUY')) {
-      if (lastBotMsg.includes('TYPE OF PROPERTY')) return { text: "Select configuration:", buttons: ['1️⃣ 1 BHK', '2️⃣ 2 BHK', '3️⃣ 3 BHK', '4️⃣ 4 BHK', '👑 PENTHOUSE', '🏙️ STUDIO', '🔙 BACK'] };
-      if (lastBotMsg.includes('SELECT CONFIGURATION')) return { text: "Select budget range:", buttons: ['Under ₹50L', '₹50L - ₹1Cr', '₹1Cr - ₹2Cr', '₹2Cr - ₹5Cr', '₹5Cr+', '💰 CUSTOM', '🔙 BACK'] };
-      if (last.includes('CUSTOM') && !lastBotMsg.includes('TYPE YOUR CUSTOM')) return { text: "Please type your custom budget (e.g., 85 Lakhs) and press Enter.", buttons: ['🔙 BACK'] };
-      if (lastBotMsg.includes('BUDGET RANGE') || lastBotMsg.includes('CUSTOM BUDGET')) {
-          if (last !== '🔙 BACK') return { text: "Select location city:", buttons: ['🏙️ GANDHINAGAR', '🏙️ AHMEDABAD', '🏙️ RAJKOT', '🏙️ SURAT', '🏙️ VADODARA', '📍 OTHER', '🔙 BACK'] };
+    // --- SITE VISIT FLOW (STRICT STATE MACHINE) ---
+    // If user clicked SITE VISIT
+    if (last.includes('SITE VISIT')) {
+      return { text: "Please type the Project or Society Name you wish to visit:", buttons: ['🔙 BACK'] };
+    }
+
+    // If the bot just asked for Project/Society name, any input is treated as the name
+    if (lastBotMsg.includes('PROJECT OR SOCIETY NAME')) {
+      const dateButtons = [];
+      // HIDE TODAY IF 6PM+
+      if (currentHour < 18) {
+        dateButtons.push('📅 TODAY');
       }
-      if (last.includes('GANDHINAGAR')) return { text: "Select area in Gandhinagar:", buttons: ['Sector 1-15 (Govt)', 'Sector 16-30 (Res)', '📍 INFOCITY/KUDASAN', '🛣️ RAPAT ROAD', '🎓 PDPU AREA', '🏘️ ADALAJ', '🔙 BACK'] };
-      if (lastBotMsg.includes('GANDHINAGAR') && (last.includes('SECTOR') || last.includes('INFOCITY') || last.includes('ROAD') || last.includes('AREA') || last.includes('ADALAJ'))) return { text: "Furnishing preference:", buttons: ['🛋️ FULLY FURNISHED', '🛏️ SEMI FURNISHED', '🏚️ UNFURNISHED', '🤷 ANY', '🔙 BACK'] };
-      if (lastBotMsg.includes('FURNISHING PREFERENCE')) return { text: "Possession timeline:", buttons: ['⚡ READY TO MOVE', '⏳ UNDER CONSTRUCTION', '📅 ANY', '🔙 BACK'] };
-      if (lastBotMsg.includes('POSSESSION TIMELINE')) return { text: "Select important amenities:", buttons: ['🅿️ PARKING', '🏋️ GYM', '🏊 POOL', '🌳 GARDEN', '🔒 SECURITY', '⚡ POWER BACKUP', '✅ DONE SELECTING', '🔙 BACK'] };
-      if (last.includes('DONE SELECTING')) return { text: "How should we contact you?", buttons: ['📱 WHATSAPP ONLY', '📞 CALL ONLY', '✉️ EMAIL ONLY', '🔙 BACK'] };
+      dateButtons.push('📅 TOMORROW', '📅 THIS WEEKEND', '🗓️ NEXT WEEK', '🔙 BACK');
+      return { text: "When would you like to visit?", buttons: dateButtons };
     }
 
-    // --- BRANCH: SELL ---
-    if (p.includes('SELL')) {
-      if (lastBotMsg.includes('WHAT ARE YOU SELLING')) return { text: "Configuration of property:", buttons: ['1️⃣ 1 BHK', '2️⃣ 2 BHK', '3️⃣ 3 BHK', '4️⃣ 4 BHK', '🏢 COMMERCIAL SPACE', '🔙 BACK'] };
-      if (lastBotMsg.includes('CONFIGURATION OF PROPERTY')) return { text: "Carpet area (Approx):", buttons: ['Under 1000 sq.ft', '1000-1500 sq.ft', '1500-2500 sq.ft', '2500+ sq.ft', '📏 CUSTOM AREA', '🔙 BACK'] };
-      if (last.includes('CUSTOM AREA') && !lastBotMsg.includes('TYPE YOUR CARPET AREA')) return { text: "Please type your carpet area (sq.ft) and press Enter.", buttons: ['🔙 BACK'] };
-      if (lastBotMsg.includes('CARPET AREA') || lastBotMsg.includes('CUSTOM AREA')) return { text: "Property age:", buttons: ['🆕 0-5 years', '⏳ 5-10 years', '📅 10-20 years', '🏚️ 20+ years', '🔙 BACK'] };
-      if (lastBotMsg.includes('PROPERTY AGE')) return { text: "Floor number:", buttons: ['🏢 GROUND', '1️⃣ 1st-5th', '🏢 HIGHER FLOOR', '🏙️ PENTHOUSE LEVEL', '🔙 BACK'] };
-      if (lastBotMsg.includes('FLOOR NUMBER')) return { text: "Expected price range:", buttons: ['Under ₹1Cr', '₹1Cr - ₹2Cr', '₹2Cr - ₹5Cr', '₹5Cr+', '💰 ENTER PRICE', '🔙 BACK'] };
-      if (last.includes('ENTER PRICE') && !lastBotMsg.includes('EXPECTED PRICE')) return { text: "Please type your expected price and press Enter.", buttons: ['🔙 BACK'] };
-      if (lastBotMsg.includes('PRICE RANGE') || lastBotMsg.includes('EXPECTED PRICE')) return { text: "Timeline to sell:", buttons: ['⚡ IMMEDIATE', '⏳ 1-3 MONTHS', '📅 6+ MONTHS', '🔙 BACK'] };
-      if (lastBotMsg.includes('TIMELINE TO SELL')) return { text: "How should we contact you?", buttons: ['📱 SHARE WHATSAPP', '📞 SHARE NUMBER', '🔙 BACK'] };
-    }
-
-    // --- BRANCH: RENT ---
-    if (p.includes('RENT')) {
-      if (lastBotMsg.includes('TYPE OF TENANT')) return { text: "Looking for:", buttons: ['🏢 APARTMENT', '🏡 INDEPENDENT HOUSE', '🏙️ STUDIO', '🛏️ PG/HOSTEL', '🔙 BACK'] };
-      if (lastBotMsg.includes('LOOKING FOR')) return { text: "Configuration needed:", buttons: ['1️⃣ 1 BHK', '2️⃣ 2 BHK', '3️⃣ 3 BHK', '🛏️ SINGLE ROOM', '🔙 BACK'] };
-      if (lastBotMsg.includes('CONFIGURATION NEEDED')) return { text: "Monthly budget:", buttons: ['Under ₹10K', '₹10K-₹25K', '₹25K-₹50K', '₹50K+', '💰 ENTER BUDGET', '🔙 BACK'] };
-      if (last.includes('ENTER BUDGET') && !lastBotMsg.includes('TYPE YOUR MONTHLY')) return { text: "Please type your monthly budget and press Enter.", buttons: ['🔙 BACK'] };
-      if (lastBotMsg.includes('MONTHLY BUDGET')) return { text: "Lease duration:", buttons: ['📅 11 MONTHS', '📅 2+ YEARS', '📅 FLEXIBLE', '🔙 BACK'] };
-      if (lastBotMsg.includes('LEASE DURATION')) return { text: "When to move in?", buttons: ['⚡ IMMEDIATE', '📅 NEXT MONTH', '📅 FLEXIBLE', '🔙 BACK'] };
-      if (lastBotMsg.includes('MOVE IN')) return { text: "How should we contact you?", buttons: ['📱 WHATSAPP ONLY', '📞 CALL ONLY', '🔙 BACK'] };
-    }
-
-    // --- BRANCH: COMMERCIAL ---
-    if (p.includes('COMMERCIAL') && !p.includes('BUY') && !p.includes('SELL')) {
-      if (lastBotMsg.includes('PROPERTY TYPE')) return { text: "Area required (Sq.ft):", buttons: ['Under 500', '500-1500', '1500-5000', '5000+', '📏 ENTER SQFT', '🔙 BACK'] };
-      if (lastBotMsg.includes('AREA REQUIRED') || last.includes('SQFT')) return { text: "Monthly rent / Purchase budget?", buttons: ['💰 FOR RENT', '💰 FOR BUY', '🔙 BACK'] };
-      if (lastBotMsg.includes('MONTHLY RENT') || lastBotMsg.includes('PURCHASE BUDGET')) return { text: "Preferred location city?", buttons: ['🏙️ GANDHINAGAR', '🏙️ AHMEDABAD', '🏙️ RAJKOT', '🔙 BACK'] };
-      if (lastBotMsg.includes('LOCATION CITY')) return { text: "How should we contact you?", buttons: ['📱 SHARE DETAILS', '🔙 BACK'] };
-    }
-
-    // --- BRANCH: VALUATION ---
-    if (p.includes('VALUATION')) {
-      if (lastBotMsg.includes('PROPERTY FOR VALUATION')) return { text: "Exact Area/Society Name: (Please type below)", buttons: ['🔙 BACK'] };
-      if (lastBotMsg.includes('EXACT AREA/SOCIETY NAME')) return { text: "Property Age (Years):", buttons: ['🆕 0-5', '⏳ 5-15', '🏚️ 15+', '🔙 BACK'] };
-      if (lastBotMsg.includes('PROPERTY AGE')) return { text: "How should we contact you?", buttons: ['📱 SEND REPORT ON WHATSAPP', '📞 CALL ME', '🔙 BACK'] };
-    }
-
-    // --- BRANCH: LOAN ---
-    if (p.includes('LOAN')) {
-      if (lastBotMsg.includes('LOAN FOR')) return { text: "Employment Type:", buttons: ['💼 SALARIED', '🏢 SELF-EMPLOYED', '👨‍⚕️ PROFESSIONAL', '🔙 BACK'] };
-      if (lastBotMsg.includes('EMPLOYMENT TYPE')) return { text: "Required Loan Amount:", buttons: ['₹10L-₹50L', '₹50L-₹1Cr', '₹1Cr-₹5Cr', '💰 OTHER', '🔙 BACK'] };
-      if (lastBotMsg.includes('LOAN AMOUNT')) return { text: "How should we contact you?", buttons: ['📞 CALL FOR ELIGIBILITY', '🔙 BACK'] };
-    }
-
-    // --- BRANCH: AGENT / SITE VISIT ---
-    if (p.includes('AGENT')) {
-      if (last.includes('SITE VISIT')) return { text: "Please type the Project or Society Name you wish to visit:", buttons: ['🔙 BACK'] };
-      if (lastBotMsg.includes('PROJECT OR SOCIETY NAME')) return { text: "When would you like to visit?", buttons: ['📅 TODAY', '📅 TOMORROW', '📅 THIS WEEKEND', '🕒 CUSTOM TIME', '🔙 BACK'] };
-      if (lastBotMsg.includes('LIKE TO VISIT')) return { text: "How should we contact you to confirm?", buttons: ['📱 WHATSAPP', '📞 PHONE CALL', '🔙 BACK'] };
+    // If user selected a Date
+    if (lastBotMsg.includes('LIKE TO VISIT')) {
+      const isToday = last.includes('TODAY');
+      const slots: string[] = [];
       
-      // Generic Agent branches
-      if (lastBotMsg.includes('NEED HELP WITH') && !last.includes('SITE')) return { text: "Please describe your requirement briefly:", buttons: ['🔙 BACK'] };
-      if (lastBotMsg.includes('REQUIREMENT BRIEFLY')) return { text: "How should we contact you?", buttons: ['📱 WHATSAPP', '📞 PHONE CALL', '🔙 BACK'] };
+      if (!isToday || currentHour < 10) slots.push('🌅 MORNING (10-12)');
+      if (!isToday || currentHour < 14) slots.push('☀️ AFTERNOON (2-4)');
+      if (!isToday || currentHour < 17) slots.push('🌆 EVENING (5-7)');
+      
+      slots.push('🕒 ANYTIME', '🔙 BACK');
+
+      if (isToday && slots.length <= 2) {
+         return { 
+           text: "It's past visiting hours for today. I've scheduled you for Tomorrow instead. What time works?", 
+           buttons: ['🌅 MORNING (10-12)', '☀️ AFTERNOON (2-4)', '🌆 EVENING (5-7)', '🕒 ANYTIME', '🔙 BACK'] 
+         };
+      }
+      return { text: `Great! Which time slot for ${userInput} works best?`, buttons: slots };
+    }
+
+    // If user selected a Slot
+    if (lastBotMsg.includes('WHICH TIME SLOT') || lastBotMsg.includes('WHICH SLOT WORKS BEST')) {
+      return { text: "How should we contact you to confirm this appointment?", buttons: ['📱 WHATSAPP', '📞 PHONE CALL', '🔙 BACK'] };
     }
 
     // --- FINAL SUMMARY TRIGGER ---
@@ -127,7 +100,7 @@ const BotSimulator: React.FC<{ config: any }> = ({ config }) => {
     if (isContactStep) {
        const summaryList = Object.entries(selections).map(([k,v]) => `${v}`).join(' → ');
        return { 
-         text: `📋 SUMMARY CAPTURED:\n\n${summaryList}\n\n${amenities.length ? "🏊 Amenities: " + amenities.join(", ") : ""}`, 
+         text: `📋 SITE VISIT REQUEST CAPTURED:\n\n${summaryList}\n\nOur team will contact you shortly.`, 
          buttons: ['✅ CONFIRM & SEND', '✏️ EDIT DETAILS', '🏠 HOME'],
          isSummary: true
        };
@@ -144,7 +117,6 @@ const BotSimulator: React.FC<{ config: any }> = ({ config }) => {
       setMessages([{ role: 'model', text: "Welcome! What are you looking for?", buttons: ['🏠 BUY PROPERTY', '💰 SELL PROPERTY', '📝 RENT PROPERTY', '🏢 COMMERCIAL', '📊 VALUATION', '🏦 LOAN', '👨‍💼 AGENT'] }]);
       setCurrentPath([]);
       setSelections({});
-      setAmenities([]);
       setInput('');
       return;
     }
@@ -162,20 +134,6 @@ const BotSimulator: React.FC<{ config: any }> = ({ config }) => {
       return;
     }
 
-    const amenList = ['🅿️ PARKING', '🏋️ GYM', '🏊 POOL', '🌳 GARDEN', '🔒 SECURITY', '⚡ POWER BACKUP'];
-    if (amenList.includes(textToSend)) {
-      const newAmen = amenities.includes(textToSend) ? amenities.filter(a => a !== textToSend) : [...amenities, textToSend];
-      setAmenities(newAmen);
-      setMessages(prev => {
-        const last = prev[prev.length - 1];
-        if (last.role === 'model') {
-          return [...prev.slice(0, -1), { ...last, text: `Selected Amenities: ${newAmen.length ? newAmen.join(', ') : 'None'}\n\nSelect more or click Done.` }];
-        }
-        return prev;
-      });
-      return;
-    }
-
     setInput('');
     setMessages(prev => [...prev, { role: 'user', text: textToSend }]);
     setLoading(true);
@@ -190,28 +148,31 @@ const BotSimulator: React.FC<{ config: any }> = ({ config }) => {
     let suggestedButtons: string[] = [];
     let isSummary = false;
 
+    // Logic for State Engine (Offline)
     if (botRawReply === "__OFFLINE_FLOW__" || !aiEnabled) {
       const stepData = getStepData(textToSend, currentPath);
       if (stepData) {
         cleanText = stepData.text;
         suggestedButtons = stepData.buttons || [];
         isSummary = !!stepData.isSummary;
-        setCurrentPath([...currentPath, textToSend]);
+        setCurrentPath(prev => [...prev, textToSend]);
       } else if (textToSend === '✅ CONFIRM & SEND') {
-        cleanText = "✅ SUCCESS! Request Sent.\n\nOur team will contact you shortly.";
-        suggestedButtons = ['🏠 HOME', '📞 CALL AGENT'];
+        cleanText = "✅ SUCCESS! Request received. We will contact you soon.";
+        suggestedButtons = ['🏠 HOME'];
       } else {
-        cleanText = "I didn't quite catch that. Please follow the instructions or use buttons.";
+        cleanText = "I didn't quite catch that. Please use buttons or provide the requested name.";
         const lastBot = messages.filter(m => m.role === 'model').slice(-1)[0];
         suggestedButtons = lastBot?.buttons || ['🏠 HOME'];
       }
     } else {
+      // AI Logic
       cleanText = botRawReply;
       const optionsMatch = botRawReply.match(/\[OPTIONS:\s*(.*?)\]/i);
       if (optionsMatch && optionsMatch[1]) {
         suggestedButtons = optionsMatch[1].split(',').map(s => s.trim());
         cleanText = botRawReply.replace(/\[OPTIONS:.*?\]/gi, '').trim();
       }
+      setCurrentPath(prev => [...prev, textToSend]);
     }
 
     setMessages(prev => [...prev, { role: 'model', text: cleanText, buttons: suggestedButtons, isSummary }]);
@@ -221,7 +182,6 @@ const BotSimulator: React.FC<{ config: any }> = ({ config }) => {
        await syncLeadToGoogleSheets({
           name: "Simulator User",
           summary: JSON.stringify(newSelections),
-          amenities: amenities.join(', '),
           agent: activeAgent.name,
           engine: aiEnabled ? 'AI' : 'State Engine'
        }, config.automation.sheetsEndpoint);
@@ -241,10 +201,6 @@ const BotSimulator: React.FC<{ config: any }> = ({ config }) => {
             {aiEnabled ? 'AI Assistant' : 'Smart Bot'}
           </div>
         </div>
-        <div className="flex gap-4 opacity-80 text-sm">
-          <i className="fa-solid fa-video cursor-pointer"></i>
-          <i className="fa-solid fa-phone cursor-pointer"></i>
-        </div>
       </div>
 
       <div ref={scrollRef} className="flex-1 p-4 overflow-y-auto space-y-4 bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-repeat scroll-smooth pb-10">
@@ -255,7 +211,7 @@ const BotSimulator: React.FC<{ config: any }> = ({ config }) => {
             } ${m.isSummary ? 'border-2 border-emerald-500 bg-emerald-50' : ''}`}>
               <p className={`whitespace-pre-wrap leading-relaxed ${m.isSummary ? 'font-bold text-emerald-900' : 'text-slate-800'}`}>{m.text}</p>
               <div className="flex justify-end items-center gap-1 mt-1">
-                <p className="text-[8px] text-slate-400 font-black uppercase">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                <p className="text-[8px] text-slate-400 uppercase">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                 {m.role === 'user' && <i className="fa-solid fa-check-double text-[8px] text-blue-400"></i>}
               </div>
             </div>
@@ -272,8 +228,6 @@ const BotSimulator: React.FC<{ config: any }> = ({ config }) => {
                         ? 'bg-slate-100 border-slate-300 text-slate-600' 
                         : btn.includes('CONFIRM') || btn.includes('DONE')
                         ? 'bg-emerald-600 border-emerald-700 text-white col-span-2 py-4'
-                        : amenities.includes(btn) 
-                        ? 'bg-emerald-100 border-emerald-500 text-emerald-700 font-black'
                         : 'bg-white border-emerald-100 text-[#00a884] hover:bg-[#00a884] hover:text-white'
                     }`}
                   >
@@ -286,7 +240,7 @@ const BotSimulator: React.FC<{ config: any }> = ({ config }) => {
         ))}
         {loading && (
           <div className="flex justify-start">
-             <div className="bg-white/90 px-5 py-2.5 rounded-full text-[9px] font-black text-slate-500 animate-pulse border border-slate-200">typing...</div>
+             <div className="bg-white/90 px-5 py-2.5 rounded-full text-[9px] text-slate-500 animate-pulse border border-slate-200">typing...</div>
           </div>
         )}
       </div>
@@ -296,8 +250,8 @@ const BotSimulator: React.FC<{ config: any }> = ({ config }) => {
         <div className="flex-1 relative">
            <input 
              type="text" 
-             className="w-full bg-white border border-slate-200 rounded-full px-5 py-2.5 text-[11px] font-medium outline-none focus:ring-2 focus:ring-[#00a884]" 
-             placeholder="Type project name, area, or budget..." 
+             className="w-full bg-white border border-slate-200 rounded-full px-5 py-2.5 text-[11px] outline-none" 
+             placeholder="Type project name..." 
              value={input}
              onChange={(e) => setInput(e.target.value)}
              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
