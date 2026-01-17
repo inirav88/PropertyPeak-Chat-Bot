@@ -34,6 +34,29 @@ const BotSimulator: React.FC<{ config: any }> = ({ config }) => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
+  // Helper to get realistic time slots based on current hour
+  const getAvailableSlots = (isToday: boolean) => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const backBtn = '🔙 BACK';
+
+    if (!isToday) {
+      return ['🌅 MORNING (10-12)', '☀️ AFTERNOON (2-4)', '🌆 EVENING (5-7)', '🕒 ANYTIME', backBtn];
+    }
+
+    const slots = [];
+    // If current time is 11:00 AM, Morning slot (10-12) is already too late/in-progress
+    // We only show slots that START at least 1 hour from now
+    if (currentHour < 9) slots.push('🌅 MORNING (10-12)');
+    if (currentHour < 13) slots.push('☀️ AFTERNOON (2-4)');
+    if (currentHour < 16) slots.push('🌆 EVENING (5-7)');
+    
+    slots.push('🕒 ANYTIME');
+    slots.push(backBtn);
+    
+    return slots;
+  };
+
   // Robust State Engine for Offline Mode
   const getStepData = (userInput: string, path: string[]) => {
     const cleanInput = userInput.replace(/[^\w\s]/g, '').trim().toUpperCase();
@@ -115,19 +138,33 @@ const BotSimulator: React.FC<{ config: any }> = ({ config }) => {
         (lastBotMsg.includes('LOCATION WHERE YOU ARE LOOKING') && isLocalityInput) ||
         (lastBotMsg.includes('PROJECT OR SECTOR') && isLocalityInput) ||
         isValuationInput || isSellAddressInput) {
+      
+      const timingButtons = [];
+      // Only show "TODAY" if it's before 5:00 PM
+      if (currentHour < 17) timingButtons.push('📅 TODAY');
+      timingButtons.push('📅 TOMORROW', '📅 THIS WEEKEND', '🔙 BACK');
+
       return { 
         text: "Understood. When would you like to schedule a call or site visit with our expert?", 
-        buttons: (currentHour < 18 ? ['📅 TODAY', '📅 TOMORROW', '📅 THIS WEEKEND', '🔙 BACK'] : ['📅 TOMORROW', '📅 THIS WEEKEND', '🗓️ NEXT WEEK', '🔙 BACK']) 
+        buttons: timingButtons
       };
     }
 
     // 5. Timing to Slot (Layer 5)
     if (lastBotMsg.includes('SCHEDULE A CALL') || lastBotMsg.includes('WHEN WOULD YOU LIKE')) {
-      return { text: "Perfect. Which time slot works best for you?", buttons: ['🌅 MORNING (10-12)', '☀️ AFTERNOON (2-4)', '🌆 EVENING (5-7)', '🕒 ANYTIME', '🔙 BACK'] };
+      const isToday = cleanInput.includes('TODAY');
+      const slots = getAvailableSlots(isToday);
+      
+      return { 
+        text: isToday 
+          ? "Great. Which of our remaining time slots for today works best for you?" 
+          : "Perfect. Which time slot works best for you?", 
+        buttons: slots 
+      };
     }
 
     // 6. Slot to Contact (Layer 6)
-    if (lastBotMsg.includes('TIME SLOT')) {
+    if (lastBotMsg.includes('TIME SLOT') || lastBotMsg.includes('REMAINING TIME SLOTS')) {
       return { text: "To assist you better, how should our expert contact you?", buttons: ['📱 WHATSAPP', '📞 PHONE CALL', '📧 EMAIL', '🔙 BACK'] };
     }
 
@@ -169,20 +206,18 @@ const BotSimulator: React.FC<{ config: any }> = ({ config }) => {
       if (currentPath.length === 0) return;
 
       const newPath = [...currentPath];
-      newPath.pop(); // Remove last user choice
+      newPath.pop(); 
       
       const newSelections = { ...selections };
-      delete newSelections[`Step_${currentPath.length}`]; // Clean up selection record
+      const currentStepKey = `Step_${currentPath.length}`;
+      delete newSelections[currentStepKey];
       
-      // We go back by 2 bot messages (the one that just happened, and the one before it)
       const modelMsgs = messages.filter(m => m.role === 'model');
       if (modelMsgs.length < 2) {
-        // Fallback to home if stack is too shallow
         handleSend('🏠 HOME');
         return;
       }
 
-      // Re-initialize to the state before the last bot message
       const prevBotMsg = modelMsgs[modelMsgs.length - 2];
       
       setMessages(prev => [...prev, 

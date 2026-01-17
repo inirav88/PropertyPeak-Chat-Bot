@@ -9,7 +9,7 @@ export const DEFAULT_CONFIG = {
   },
   api: {
     provider: "gemini" as "gemini" | "openai" | "grok" | "custom",
-    aiEnabled: true,
+    aiEnabled: false,
     geminiKey: "",
     openaiKey: "",
     openaiOrg: "",
@@ -23,9 +23,10 @@ export const DEFAULT_CONFIG = {
     topP: 0.95
   },
   meta: {
-    phoneNumberId: "", // <--- Place Phone Number ID here
-    wabaId: "",        // <--- Place WhatsApp Business Account ID here
-    accessToken: "",   // <--- Place Permanent Access Token here
+    phoneNumberId: "",
+    wabaId: "",
+    accessToken: "",
+    testRecipient: "", // Whitelisted test number for development mode
     webhookVerifyToken: "propai_secure_v1",
     apiVersion: "v21.0"
   },
