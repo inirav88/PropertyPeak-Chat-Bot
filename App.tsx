@@ -22,12 +22,16 @@ const App: React.FC = () => {
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedData = loadFromDatabase();
-    if (savedData) {
-      if (savedData.features) setFeatures(savedData.features);
-      if (savedData.leads) setLeads(savedData.leads);
-      if (savedData.config) setConfig(savedData.config);
-    }
+    // Correctly await the promise from loadFromDatabase
+    const initData = async () => {
+      const savedData = await loadFromDatabase();
+      if (savedData) {
+        if (savedData.features) setFeatures(savedData.features);
+        if (savedData.leads) setLeads(savedData.leads);
+        if (savedData.config) setConfig(savedData.config);
+      }
+    };
+    initData();
   }, []);
 
   const syncData = (updatedConfig?: any, updatedFeatures?: BotFeature[]) => {
