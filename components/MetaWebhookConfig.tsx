@@ -35,6 +35,7 @@ const MetaWebhookConfig: React.FC<MetaWebhookConfigProps> = ({ config, setConfig
   };
 
   const isAiEnabled = config.api.aiEnabled;
+  const provider = config.api.provider;
 
   return (
     <div className="space-y-6 animate-in fade-in pb-20">
@@ -56,7 +57,7 @@ const MetaWebhookConfig: React.FC<MetaWebhookConfigProps> = ({ config, setConfig
           </div>
         </div>
 
-        <div className={`p-6 space-y-6 transition-all ${isAiEnabled ? 'opacity-100' : 'opacity-40 pointer-events-none grayscale'}`}>
+        <div className={`p-6 space-y-8 transition-all ${isAiEnabled ? 'opacity-100' : 'opacity-40 pointer-events-none grayscale'}`}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Select AI Provider</label>
@@ -65,9 +66,11 @@ const MetaWebhookConfig: React.FC<MetaWebhookConfigProps> = ({ config, setConfig
                 onChange={(e) => handleChange('api', 'provider', e.target.value)}
                 className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 appearance-none cursor-pointer"
               >
-                <option value="gemini">Google Gemini (Multi-lingual)</option>
-                <option value="openai">OpenAI GPT-4o</option>
+                <option value="gemini">Google Gemini</option>
+                <option value="openai">OpenAI (GPT-4o/o1)</option>
+                <option value="grok">xAI Grok</option>
                 <option value="llama">Meta Llama 3</option>
+                <option value="deepseek">DeepSeek AI</option>
               </select>
             </div>
             
@@ -76,11 +79,184 @@ const MetaWebhookConfig: React.FC<MetaWebhookConfigProps> = ({ config, setConfig
               <input 
                 type="text" 
                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-emerald-500 font-mono"
-                placeholder="e.g. gemini-3-flash-preview"
+                placeholder={
+                  provider === 'openai' ? 'e.g. gpt-4o' : 
+                  provider === 'grok' ? 'e.g. grok-beta' : 
+                  provider === 'llama' ? 'e.g. llama3-8b' :
+                  provider === 'deepseek' ? 'e.g. deepseek-chat' :
+                  'e.g. gemini-3-flash-preview'
+                }
                 value={config.api.modelName}
                 onChange={(e) => handleChange('api', 'modelName', e.target.value)}
               />
             </div>
+          </div>
+
+          {/* DYNAMIC PROVIDER SPECIFIC FIELDS */}
+          <div className="space-y-6 pt-4 border-t border-slate-100">
+             <div className="flex items-center gap-2 mb-2">
+                <i className="fa-solid fa-microchip text-emerald-500 text-sm"></i>
+                <h4 className="text-xs font-black uppercase tracking-widest text-slate-800">{provider} Specific Configuration</h4>
+             </div>
+             
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* OpenAI Specific Fields */}
+                {provider === 'openai' && (
+                  <>
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">OpenAI API Key</label>
+                      <input 
+                        type="password" 
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-emerald-500 font-mono"
+                        value={config.api.openaiKey}
+                        onChange={(e) => handleChange('api', 'openaiKey', e.target.value)}
+                        placeholder="sk-..."
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">OpenAI Org ID (Optional)</label>
+                      <input 
+                        type="text" 
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-emerald-500 font-mono"
+                        value={config.api.openaiOrg}
+                        onChange={(e) => handleChange('api', 'openaiOrg', e.target.value)}
+                        placeholder="org-..."
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Grok Specific Fields */}
+                {provider === 'grok' && (
+                  <>
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Grok API Key</label>
+                      <input 
+                        type="password" 
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-emerald-500 font-mono"
+                        value={config.api.grokKey}
+                        onChange={(e) => handleChange('api', 'grokKey', e.target.value)}
+                        placeholder="xai-..."
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Max Tokens</label>
+                        <span className="text-[10px] font-bold text-emerald-600 font-mono">{config.api.maxTokens}</span>
+                      </div>
+                      <input 
+                        type="number" 
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-emerald-500 font-mono"
+                        value={config.api.maxTokens}
+                        onChange={(e) => handleChange('api', 'maxTokens', parseInt(e.target.value) || 0)}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Gemini Specific Fields */}
+                {provider === 'gemini' && (
+                  <>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Creativity (Temperature)</label>
+                        <span className="text-[10px] font-bold text-emerald-600 font-mono">{config.api.temperature}</span>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="0" max="1" step="0.05"
+                        className="w-full accent-emerald-500 h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer"
+                        value={config.api.temperature}
+                        onChange={(e) => handleChange('api', 'temperature', parseFloat(e.target.value))}
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Diversity (Top P)</label>
+                        <span className="text-[10px] font-bold text-emerald-600 font-mono">{config.api.topP}</span>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="0" max="1" step="0.05"
+                        className="w-full accent-emerald-500 h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer"
+                        value={config.api.topP}
+                        onChange={(e) => handleChange('api', 'topP', parseFloat(e.target.value))}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Llama Specific Fields */}
+                {provider === 'llama' && (
+                  <>
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Llama Base URL (e.g. Ollama)</label>
+                      <input 
+                        type="text" 
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-emerald-500 font-mono"
+                        value={config.api.llamaBaseUrl}
+                        onChange={(e) => handleChange('api', 'llamaBaseUrl', e.target.value)}
+                        placeholder="http://localhost:11434/v1"
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Llama API Key (Optional)</label>
+                      <input 
+                        type="password" 
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-emerald-500 font-mono"
+                        value={config.api.llamaKey}
+                        onChange={(e) => handleChange('api', 'llamaKey', e.target.value)}
+                        placeholder="Enter key if using cloud llama"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* DeepSeek Specific Fields */}
+                {provider === 'deepseek' && (
+                  <>
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">DeepSeek API Key</label>
+                      <input 
+                        type="password" 
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-emerald-500 font-mono"
+                        value={config.api.deepseekKey}
+                        onChange={(e) => handleChange('api', 'deepseekKey', e.target.value)}
+                        placeholder="sk-..."
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Max Tokens</label>
+                        <span className="text-[10px] font-bold text-emerald-600 font-mono">{config.api.maxTokens}</span>
+                      </div>
+                      <input 
+                        type="number" 
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-emerald-500 font-mono"
+                        value={config.api.maxTokens}
+                        onChange={(e) => handleChange('api', 'maxTokens', parseInt(e.target.value) || 0)}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Always show for Grok or as advanced option */}
+                {provider === 'grok' && (
+                   <div className="space-y-3">
+                    <div className="flex justify-between">
+                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Temp. Modifier</label>
+                        <span className="text-[10px] font-bold text-emerald-600 font-mono">{config.api.temperatureModifier}</span>
+                    </div>
+                    <input 
+                      type="number" 
+                      step="0.1"
+                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-emerald-500 font-mono"
+                      value={config.api.temperatureModifier}
+                      onChange={(e) => handleChange('api', 'temperatureModifier', parseFloat(e.target.value) || 0)}
+                    />
+                  </div>
+                )}
+             </div>
           </div>
         </div>
       </div>
